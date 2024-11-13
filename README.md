@@ -35,7 +35,7 @@ A modern event ticketing platform built with Next.js, Supabase, and Stripe.
 1. Clone the repository:
 
 ```bash
-git clone [repository-url]
+git clone https://github.com/Tekthree/ticketing-app-two.git
 cd ticketing-platform
 ```
 
