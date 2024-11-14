@@ -1,3 +1,4 @@
+// @@filename: src/middleware.ts
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
@@ -39,7 +40,12 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getSession()
 
   // Protected routes
-  if (request.nextUrl.pathname.startsWith('/dashboard')) {
+  if (
+    request.nextUrl.pathname.startsWith('/dashboard') ||
+    request.nextUrl.pathname.startsWith('/events') ||
+    request.nextUrl.pathname.startsWith('/tickets') ||
+    request.nextUrl.pathname.startsWith('/analytics')
+  ) {
     if (!session) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
@@ -56,5 +62,12 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/register'],
+  matcher: [
+    '/dashboard/:path*',
+    '/events/:path*',
+    '/tickets/:path*',
+    '/analytics/:path*',
+    '/login',
+    '/register',
+  ],
 }

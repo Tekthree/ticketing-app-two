@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function GET(
@@ -6,8 +6,10 @@ export async function GET(
   { params }: { params: { orderId: string } }
 ) {
   try {
-    const supabase = createServerClient()
+    // Use createServerSupabaseClient instead of createServerClient
+    const supabase = await createServerSupabaseClient()
 
+    // Fetch the order with related data
     const { data: order, error } = await supabase
       .from('orders')
       .select(
@@ -28,15 +30,12 @@ export async function GET(
       .single()
 
     if (error || !order) {
-      return new NextResponse(
-        JSON.stringify({
+      return NextResponse.json(
+        {
           valid: false,
           message: 'Ticket not found',
-        }),
-        {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' },
-        }
+        },
+        { status: 404 }
       )
     }
 
@@ -45,8 +44,8 @@ export async function GET(
     const now = new Date()
 
     if (eventDate < now) {
-      return new NextResponse(
-        JSON.stringify({
+      return NextResponse.json(
+        {
           valid: false,
           message: 'Event has already passed',
           ticket: {
@@ -56,23 +55,19 @@ export async function GET(
             eventDate: eventDate.toISOString(),
             venue: order.ticket_types.events.venue,
           },
-        }),
-        {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }
+        },
+        { status: 200 }
       )
     }
 
     // Get the current user to check if they're the organizer
     const {
-      data: { session },
-    } = await supabase.auth.getSession()
-    const isOrganizer =
-      session?.user?.id === order.ticket_types.events.organizer_id
+      data: { user },
+    } = await supabase.auth.getUser()
+    const isOrganizer = user?.id === order.ticket_types.events.organizer_id
 
-    return new NextResponse(
-      JSON.stringify({
+    return NextResponse.json(
+      {
         valid: true,
         isOrganizer,
         ticket: {
@@ -82,23 +77,17 @@ export async function GET(
           eventDate: eventDate.toISOString(),
           venue: order.ticket_types.events.venue,
         },
-      }),
-      {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }
+      },
+      { status: 200 }
     )
   } catch (error) {
     console.error('Error verifying ticket:', error)
-    return new NextResponse(
-      JSON.stringify({
+    return NextResponse.json(
+      {
         valid: false,
         message: 'Error verifying ticket',
-      }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
+      },
+      { status: 500 }
     )
   }
 }

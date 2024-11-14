@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { TicketTypesSection } from '@/components/tickets/ticket-types-section'
 import { Button } from '@/components/ui/button'
 import { Calendar, MapPin, Users, Edit } from 'lucide-react'
@@ -14,7 +14,7 @@ interface EventDetailsPageProps {
 export default async function EventDetailsPage({
   params,
 }: EventDetailsPageProps) {
-  const supabase = createServerClient()
+  const supabase = createServerSupabaseClient()
 
   // Fetch event details
   const { data: event, error: eventError } = await supabase

@@ -1,6 +1,5 @@
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe/server'
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
@@ -8,7 +7,8 @@ export async function POST(req: Request) {
     const { ticketTypeId, quantity, customerEmail, customerName } =
       await req.json()
 
-    const supabase = createServerClient()
+    // Use createServerSupabaseClient instead of createServerClient
+    const supabase = await createServerSupabaseClient()
 
     // Get ticket type details
     const { data: ticketType, error: ticketError } = await supabase
@@ -27,12 +27,18 @@ export async function POST(req: Request) {
       .single()
 
     if (ticketError || !ticketType) {
-      return new NextResponse('Ticket type not found', { status: 404 })
+      return NextResponse.json(
+        { error: 'Ticket type not found' },
+        { status: 404 }
+      )
     }
 
     // Check if enough tickets are available
     if (ticketType.quantity - ticketType.quantity_sold < quantity) {
-      return new NextResponse('Not enough tickets available', { status: 400 })
+      return NextResponse.json(
+        { error: 'Not enough tickets available' },
+        { status: 400 }
+      )
     }
 
     // Create Stripe checkout session
@@ -68,6 +74,6 @@ Location: ${ticketType.events.venue}`,
     return NextResponse.json({ sessionId: session.id })
   } catch (error) {
     console.error('Checkout error:', error)
-    return new NextResponse('Internal error', { status: 500 })
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 })
   }
 }

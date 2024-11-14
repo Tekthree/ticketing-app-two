@@ -126,6 +126,42 @@ export function EventForm({ initialData, onSuccess }: EventFormProps) {
     }
   }
 
+   const createEvent = async (
+     eventData: Omit<EventFormValues, 'id' | 'created_at'>
+   ) => {
+     const { data: newEvent, error: insertError } = await supabase
+       .from('events')
+       .insert([eventData])
+       .select()
+       .single()
+
+     if (insertError) {
+       console.error('Event creation error:', insertError)
+       throw insertError
+     }
+
+     return newEvent
+   }
+
+   const updateEvent = async (
+     id: string,
+     updates: Partial<EventFormValues>
+   ) => {
+     const { data: updatedEvent, error: updateError } = await supabase
+       .from('events')
+       .update(updates)
+       .eq('id', id)
+       .select()
+       .single()
+
+     if (updateError) {
+       console.error('Event update error:', updateError)
+       throw updateError
+     }
+
+     return updatedEvent
+   }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
       <div className='space-y-4'>

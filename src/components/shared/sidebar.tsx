@@ -1,3 +1,4 @@
+// @@filename: src/components/shared/sidebar.tsx
 'use client'
 
 import Link from 'next/link'
@@ -6,7 +7,7 @@ import { cn } from '@/lib/utils'
 import { LayoutDashboard, Calendar, Ticket, BarChart } from 'lucide-react'
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }, // Fixed: Previously dashboard might have been linked incorrectly
   { name: 'Events', href: '/events', icon: Calendar },
   { name: 'Tickets', href: '/tickets', icon: Ticket },
   { name: 'Analytics', href: '/analytics', icon: BarChart },

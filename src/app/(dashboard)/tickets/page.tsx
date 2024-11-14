@@ -1,132 +1,81 @@
-import { createServerClient } from '@/lib/supabase/server'
-import { Calendar, MapPin } from 'lucide-react'
-import { QRCode } from '@/components/tickets/qr-code'
+// @@filename: src/app/(dashboard)/tickets/page.tsx
+
 import Link from 'next/link'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { TicketList } from '@/components/tickets/ticket-list'
+import { DashboardHeader } from '@/components/shared/dashboard-header'
+import { DashboardShell } from '@/components/shared/dashboard-shell'
+import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
+import { redirect } from 'next/navigation'
 
-export default async function TicketsPage() {
-  const supabase = createServerClient()
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
+async function getOrders() {
+  const supabase = await createServerSupabaseClient()
+
+  // First verify the user is authenticated
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
 
-  if (!session) {
-    return null
+  if (userError || !user) {
+    redirect('/login')
   }
 
-  const { data: orders } = await supabase
+  // Now fetch the orders with proper relationships
+  const { data: orders, error: ordersError } = await supabase
     .from('orders')
     .select(
       `
-      *,
+      id,
+      quantity,
+      total_amount,
+      payment_status, 
+      created_at,
       ticket_types (
         name,
         events (
-          id,
           title,
           date,
           venue
         )
-      )
+      )  
     `
     )
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id)
     .eq('payment_status', 'completed')
     .order('created_at', { ascending: false })
 
-  if (!orders?.length) {
-    return (
-      <div className='text-center'>
-        <h3 className='mt-2 text-sm font-semibold text-gray-900'>
-          No tickets yet
-        </h3>
-        <p className='mt-1 text-sm text-gray-500'>
-          Get started by purchasing tickets to an event.
-        </p>
-        <div className='mt-6'>
-          <Link
-            href='/events'
-            className='inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary/90'
-          >
-            Browse Events
-          </Link>
-        </div>
-      </div>
-    )
+  if (ordersError) {
+    console.error('Error fetching orders:', ordersError)
+    throw new Error('Failed to fetch orders')
   }
 
+  return orders
+}
+
+export default async function TicketsPage() {
+  const orders = await getOrders()
+
   return (
-    <div className='space-y-6'>
-      <div>
-        <h1 className='text-2xl font-bold tracking-tight'>My Tickets</h1>
-        <p className='text-muted-foreground'>
-          View and manage your tickets for upcoming events
-        </p>
+    <DashboardShell>
+      <DashboardHeader
+        heading='My Tickets'
+        text='View and manage your event tickets.'
+      >
+        <Button asChild>
+          <Link href='/events'>
+            <Plus className='mr-2 h-4 w-4' />
+            Find Events
+          </Link>
+        </Button>
+      </DashboardHeader>
+      <div className='grid gap-8'>
+        <TicketList orders={orders ?? []} />
       </div>
-
-      <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
-        {orders.map(order => {
-          const event = order.ticket_types.events
-          const ticketType = order.ticket_types
-
-          return (
-            <div
-              key={order.id}
-              className='bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200'
-            >
-              <div className='px-4 py-5 sm:p-6'>
-                <h3 className='text-lg font-medium text-gray-900 truncate'>
-                  {event.title}
-                </h3>
-
-                <div className='mt-4 space-y-2'>
-                  <div className='flex items-center text-sm text-gray-500'>
-                    <Calendar className='mr-2 h-4 w-4' />
-                    {new Date(event.date).toLocaleDateString('en-US', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: 'numeric',
-                      minute: '2-digit',
-                    })}
-                  </div>
-
-                  <div className='flex items-center text-sm text-gray-500'>
-                    <MapPin className='mr-2 h-4 w-4' />
-                    {event.venue}
-                  </div>
-                </div>
-
-                <div className='mt-4'>
-                  <p className='text-sm text-gray-900'>
-                    {ticketType.name} × {order.quantity}
-                  </p>
-                  <p className='text-sm text-gray-600'>
-                    Order #{order.id.slice(0, 8)}
-                  </p>
-                </div>
-
-                <div className='mt-4 flex justify-center'>
-                  <QRCode
-                    value={`${process.env.NEXT_PUBLIC_APP_URL}/api/tickets/verify/${order.id}`}
-                    size={150}
-                  />
-                </div>
-              </div>
-
-              <div className='px-4 py-4 sm:px-6'>
-                <Link
-                  href={`/events/${event.id}`}
-                  className='text-primary hover:text-primary/90 text-sm font-medium'
-                >
-                  View Event Details
-                </Link>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
+    </DashboardShell>
   )
 }

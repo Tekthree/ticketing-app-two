@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe/server'
 import { CheckCircle2 } from 'lucide-react'
 import { notFound } from 'next/navigation'
@@ -22,31 +22,38 @@ export default async function ConfirmationPage({ searchParams }: Props) {
     notFound()
   }
 
-  const supabase = createServerClient()
+  const supabase = createServerSupabaseClient()
 
-  const { data: order } = await supabase
-    .from('orders')
-    .select(
-      `
-      *,
-      ticket_types (
-        name,
-        events (
-          title,
-          date,
-          venue
-        )
+ const { data: order, error } = await supabase
+   .from('orders')
+   .select(
+     `
+    *,
+    ticket_types (
+      name,
+      events (
+        title,
+        date,
+        venue
       )
-    `
     )
-    .eq('payment_status', 'completed')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single()
+  `
+   )
+   .eq('payment_status', 'completed')
+   .order('created_at', { ascending: false })
+   .limit(1)
+   .single()
 
-  if (!order) {
-    notFound()
-  }
+ if (error) {
+   console.error('Error fetching order:', error)
+   // Handle the error, e.g., show an error message or redirect to an error page
+   return <div>An error occurred while fetching the order.</div>
+ }
+
+ if (!order) {
+   // Handle the case when the order is not found
+   return <div>Order not found.</div>
+ }
 
   const event = order.ticket_types.events
   const ticketType = order.ticket_types
