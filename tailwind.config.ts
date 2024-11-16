@@ -18,6 +18,12 @@ const config: Config = {
     extend: {
       colors: {
         border: 'hsl(var(--border))',
+        purple: {
+        50: '#faf5ff',
+        100: '#f3e8ff',
+        // ... other shades
+        600: '#9333ea',
+      },
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',

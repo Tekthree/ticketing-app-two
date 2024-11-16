@@ -17,8 +17,8 @@ import {
   Loader2,
 } from 'lucide-react'
 import Link from 'next/link'
-import { formatDate } from '@/lib/utils'
 import { cn } from '@/lib/utils'
+import { formatDate } from '@/lib/utils'
 
 export function EventsList() {
   const { events, loading, error, deleteEvent } = useEvents()
