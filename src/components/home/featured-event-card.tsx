@@ -2,6 +2,14 @@
 import { Button } from '@/components/ui/button'
 import { Calendar, MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
+import { formatDate } from '@/lib/utils'
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 
 interface FeaturedEventCardProps {
   id: string
@@ -9,8 +17,7 @@ interface FeaturedEventCardProps {
   description: string
   date: string
   venue: string
-  attendees: number
-  imageUrl: string
+  capacity: number
 }
 
 export function FeaturedEventCard({
@@ -19,52 +26,35 @@ export function FeaturedEventCard({
   description,
   date,
   venue,
-  attendees,
-  imageUrl,
+  capacity,
 }: FeaturedEventCardProps) {
   return (
-    <div className='group relative flex h-full flex-col overflow-hidden rounded-lg bg-white shadow transition hover:shadow-lg'>
-      {/* Event Image */}
-      <div className='relative h-48 overflow-hidden'>
-        <div
-          className='absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105'
-          style={{ backgroundImage: `url(${imageUrl})` }}
-        />
-        <div className='absolute inset-0 bg-gradient-to-t from-black/60 to-transparent' />
-      </div>
-
-      {/* Content */}
-      <div className='flex flex-1 flex-col p-6'>
-        <h3 className='text-xl font-semibold text-gray-900'>{title}</h3>
-        <p className='mt-2 flex-1 text-sm text-gray-500 line-clamp-2'>
-          {description}
-        </p>
-
-        <div className='mt-4 space-y-2'>
-          <div className='flex items-center text-sm text-gray-600'>
+    <Card className='flex h-full flex-col'>
+      <CardHeader>
+        <CardTitle className='line-clamp-2'>{title}</CardTitle>
+      </CardHeader>
+      <CardContent className='flex-1'>
+        <p className='mb-4 line-clamp-2 text-muted-foreground'>{description}</p>
+        <div className='space-y-2'>
+          <div className='flex items-center text-sm text-muted-foreground'>
             <Calendar className='mr-2 h-4 w-4' />
-            {new Date(date).toLocaleDateString('en-US', {
-              month: 'long',
-              day: 'numeric',
-              year: 'numeric',
-            })}
+            {formatDate(date)}
           </div>
-
-          <div className='flex items-center text-sm text-gray-600'>
+          <div className='flex items-center text-sm text-muted-foreground'>
             <MapPin className='mr-2 h-4 w-4' />
             {venue}
           </div>
-
-          <div className='flex items-center text-sm text-gray-600'>
+          <div className='flex items-center text-sm text-muted-foreground'>
             <Users className='mr-2 h-4 w-4' />
-            {attendees} attendees
+            {capacity} capacity
           </div>
         </div>
-
-        <Button asChild className='mt-6 w-full'>
-          <Link href={`/events/${id}`}>Get Tickets</Link>
+      </CardContent>
+      <CardFooter>
+        <Button asChild className='w-full'>
+          <Link href={`/events/${id}`}>View Event</Link>
         </Button>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   )
 }
