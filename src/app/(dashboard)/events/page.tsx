@@ -1,26 +1,57 @@
+// @@filename: src/app/(dashboard)/events/page.tsx
+import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import { DashboardHeader } from '@/components/shared/dashboard-header'
+import { DashboardShell } from '@/components/shared/dashboard-shell'
 import { Button } from '@/components/ui/button'
-import { EventsList } from '@/components/events/events-list'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
+import { EventsList } from '@/components/events/events-list'
 
-export default function EventsPage() {
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+export default async function MyEventsPage() {
+  const supabase = await createServerSupabaseClient()
+
+  // Check if user is authenticated
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+
+  if (userError || !user) {
+    redirect('/login')
+  }
+
+  // Verify user is an organizer
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('user_id', user.id)
+    .single()
+
+  if (!profile || !['admin', 'organizer'].includes(profile.role)) {
+    redirect('/dashboard')
+  }
+
   return (
-    <div className='space-y-6'>
-      <div className='flex items-center justify-between'>
-        <div>
-          <h1 className='text-2xl font-bold tracking-tight'>Events</h1>
-          <p className='text-muted-foreground'>Create and manage your events</p>
-        </div>
-
+    <DashboardShell>
+      <DashboardHeader
+        heading='My Events'
+        text='Create and manage your events.'
+      >
         <Button asChild>
-          <Link href='/events/new'>
+          <Link href='/dashboard/events/new'>
             <Plus className='mr-2 h-4 w-4' />
             Create Event
           </Link>
         </Button>
-      </div>
+      </DashboardHeader>
 
-      <EventsList />
-    </div>
+      <div className='grid gap-8'>
+        <EventsList />
+      </div>
+    </DashboardShell>
   )
 }

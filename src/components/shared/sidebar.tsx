@@ -4,41 +4,35 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { navigation } from '@/config/navigation'
+import { dashboardNav } from '@/config/navigation'
+import { Separator } from '@/components/ui/separator'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <div className="hidden md:block w-48 sticky top-16 h-[calc(100vh-4rem)] border-r border-border bg-card">
-      <div className="h-full overflow-y-auto">
-        <nav className="space-y-1 px-3 py-5">
-          {navigation.map(item => {
-            const isActive = pathname === item.href
-            return (
+    <div className="hidden lg:block">
+      <div className="sticky top-16 z-30 -ml-2 h-[calc(100vh-3.5rem)] w-60 overflow-y-auto border-r p-4">
+        <ScrollArea className="h-full py-2">
+          <nav className="grid items-start gap-2">
+            {dashboardNav.map((item) => (
               <Link
-                key={item.name}
+                key={item.href}
                 href={item.href}
                 className={cn(
-                  'group flex items-center rounded-md px-2 py-2 text-sm font-medium transition-colors',
-                  isActive
+                  'group flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground',
+                  pathname === item.href
                     ? 'bg-accent text-accent-foreground'
-                    : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
+                    : 'transparent'
                 )}
               >
-                <item.icon
-                  className={cn(
-                    'mr-2 h-4 w-4 flex-shrink-0',
-                    isActive
-                      ? 'text-accent-foreground'
-                      : 'text-muted-foreground group-hover:text-accent-foreground'
-                  )}
-                />
-                <span className="truncate">{item.name}</span>
+                <item.icon className="mr-2 h-4 w-4" />
+                <span>{item.title}</span>
               </Link>
-            )
-          })}
-        </nav>
+            ))}
+          </nav>
+        </ScrollArea>
       </div>
     </div>
   )
