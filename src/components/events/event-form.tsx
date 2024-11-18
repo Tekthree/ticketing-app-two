@@ -12,6 +12,7 @@ import { Loader2 } from 'lucide-react'
 import { type Database } from '@/lib/supabase/types'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { ImageUpload } from './image-upload'
 
 const eventSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
@@ -45,6 +46,7 @@ interface EventFormProps {
 export function EventForm({ initialData, isEditing }: EventFormProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [eventId, setEventId] = useState(initialData?.id)
   const router = useRouter()
   const supabase = createClient()
 
@@ -61,7 +63,8 @@ export function EventForm({ initialData, isEditing }: EventFormProps) {
       date: initialData?.date || new Date().toISOString().split('T')[0],
       time: initialData?.time || new Date().toTimeString().slice(0, 5),
       capacity: initialData?.capacity || 100,
-      status: (initialData?.status as 'draft' | 'published' | 'cancelled') || 'draft',
+      status:
+        (initialData?.status as 'draft' | 'published' | 'cancelled') || 'draft',
     },
   })
 
@@ -70,7 +73,10 @@ export function EventForm({ initialData, isEditing }: EventFormProps) {
       setLoading(true)
       setError(null)
 
-      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser()
       if (userError) throw userError
       if (!user) throw new Error('Not authenticated')
 
@@ -87,14 +93,15 @@ export function EventForm({ initialData, isEditing }: EventFormProps) {
       }
 
       if (isEditing && initialData) {
-        const { error: updateError } = await supabase
+        const { data: updatedEvent, error: updateError } = await supabase
           .from('events')
           .update(eventData)
           .eq('id', initialData.id)
+          .select()
+          .single()
 
         if (updateError) throw updateError
-
-        router.push(`/events/${initialData.id}`)
+        setEventId(updatedEvent.id)
       } else {
         const { data: newEvent, error: insertError } = await supabase
           .from('events')
@@ -103,8 +110,7 @@ export function EventForm({ initialData, isEditing }: EventFormProps) {
           .single()
 
         if (insertError) throw insertError
-
-        router.push(`/events/${newEvent.id}`)
+        setEventId(newEvent.id)
       }
 
       router.refresh()
@@ -116,34 +122,45 @@ export function EventForm({ initialData, isEditing }: EventFormProps) {
     }
   }
 
-  const inputClassName = "mt-1 block w-full rounded-md border-none bg-background shadow-sm ring-1 ring-inset ring-input focus:ring-2 focus:ring-primary text-foreground dark:text-foreground sm:text-sm"
+  const inputClassName =
+    'mt-1 block w-full rounded-md border-none bg-background shadow-sm ring-1 ring-inset ring-input focus:ring-2 focus:ring-primary text-foreground dark:text-foreground sm:text-sm'
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <form onSubmit={handleSubmit(onSubmit)} className='space-y-8'>
       <Card>
         <CardHeader>
-          <h3 className="text-lg font-medium">Event Details</h3>
-          <p className="text-sm text-muted-foreground">
-            {isEditing ? "Update your event information." : "Fill in the details for your new event."}
+          <h3 className='text-lg font-medium'>Event Details</h3>
+          <p className='text-sm text-muted-foreground'>
+            {isEditing
+              ? 'Update your event information.'
+              : 'Fill in the details for your new event.'}
           </p>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className='space-y-6'>
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-foreground dark:text-foreground">
+            <label
+              htmlFor='title'
+              className='block text-sm font-medium text-foreground dark:text-foreground'
+            >
               Event Title
             </label>
             <input
               {...register('title')}
-              type="text"
+              type='text'
               className={inputClassName}
             />
             {errors.title && (
-              <p className="mt-1 text-sm text-destructive">{errors.title.message}</p>
+              <p className='mt-1 text-sm text-destructive'>
+                {errors.title.message}
+              </p>
             )}
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-foreground dark:text-foreground">
+            <label
+              htmlFor='description'
+              className='block text-sm font-medium text-foreground dark:text-foreground'
+            >
               Description
             </label>
             <textarea
@@ -152,105 +169,131 @@ export function EventForm({ initialData, isEditing }: EventFormProps) {
               className={inputClassName}
             />
             {errors.description && (
-              <p className="mt-1 text-sm text-destructive">{errors.description.message}</p>
+              <p className='mt-1 text-sm text-destructive'>
+                {errors.description.message}
+              </p>
             )}
           </div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div className='grid grid-cols-1 gap-6 sm:grid-cols-2'>
             <div>
-              <label htmlFor="date" className="block text-sm font-medium text-foreground dark:text-foreground">
+              <label
+                htmlFor='date'
+                className='block text-sm font-medium text-foreground dark:text-foreground'
+              >
                 Date
               </label>
               <input
                 {...register('date')}
-                type="date"
+                type='date'
                 className={inputClassName}
               />
               {errors.date && (
-                <p className="mt-1 text-sm text-destructive">{errors.date.message}</p>
+                <p className='mt-1 text-sm text-destructive'>
+                  {errors.date.message}
+                </p>
               )}
             </div>
 
             <div>
-              <label htmlFor="time" className="block text-sm font-medium text-foreground dark:text-foreground">
+              <label
+                htmlFor='time'
+                className='block text-sm font-medium text-foreground dark:text-foreground'
+              >
                 Time
               </label>
               <input
                 {...register('time')}
-                type="time"
+                type='time'
                 className={inputClassName}
               />
               {errors.time && (
-                <p className="mt-1 text-sm text-destructive">{errors.time.message}</p>
+                <p className='mt-1 text-sm text-destructive'>
+                  {errors.time.message}
+                </p>
               )}
             </div>
           </div>
 
           <div>
-            <label htmlFor="venue" className="block text-sm font-medium text-foreground dark:text-foreground">
+            <label
+              htmlFor='venue'
+              className='block text-sm font-medium text-foreground dark:text-foreground'
+            >
               Venue
             </label>
             <input
               {...register('venue')}
-              type="text"
+              type='text'
               className={inputClassName}
             />
             {errors.venue && (
-              <p className="mt-1 text-sm text-destructive">{errors.venue.message}</p>
+              <p className='mt-1 text-sm text-destructive'>
+                {errors.venue.message}
+              </p>
             )}
           </div>
 
           <div>
-            <label htmlFor="capacity" className="block text-sm font-medium text-foreground dark:text-foreground">
+            <label
+              htmlFor='capacity'
+              className='block text-sm font-medium text-foreground dark:text-foreground'
+            >
               Capacity
             </label>
             <input
               {...register('capacity', { valueAsNumber: true })}
-              type="number"
-              min="1"
+              type='number'
+              min='1'
               className={inputClassName}
             />
             {errors.capacity && (
-              <p className="mt-1 text-sm text-destructive">{errors.capacity.message}</p>
+              <p className='mt-1 text-sm text-destructive'>
+                {errors.capacity.message}
+              </p>
             )}
           </div>
 
           <div>
-            <label htmlFor="status" className="block text-sm font-medium text-foreground dark:text-foreground">
+            <label
+              htmlFor='status'
+              className='block text-sm font-medium text-foreground dark:text-foreground'
+            >
               Status
             </label>
-            <select
-              {...register('status')}
-              className={inputClassName}
-            >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-              <option value="cancelled">Cancelled</option>
+            <select {...register('status')} className={inputClassName}>
+              <option value='draft'>Draft</option>
+              <option value='published'>Published</option>
+              <option value='cancelled'>Cancelled</option>
             </select>
             {errors.status && (
-              <p className="mt-1 text-sm text-destructive">{errors.status.message}</p>
+              <p className='mt-1 text-sm text-destructive'>
+                {errors.status.message}
+              </p>
             )}
           </div>
         </CardContent>
       </Card>
 
+      <ImageUpload
+        eventId={eventId}
+        onUploadComplete={() => router.refresh()}
+        existingImages={initialData?.event_images}
+      />
+
       {error && (
-        <div className="rounded-lg bg-destructive/10 p-4 text-sm text-destructive">
+        <div className='rounded-lg bg-destructive/10 p-4 text-sm text-destructive'>
           {error}
         </div>
       )}
 
-      <div className="flex gap-4">
-        <Button type="submit" disabled={loading}>
-          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+      <div className='flex gap-4'>
+        <Button type='submit' disabled={loading}>
+          {loading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
           {isEditing ? 'Update Event' : 'Create Event'}
         </Button>
 
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.back()}
-        >
+        <Button type='button' variant='outline' onClick={() => router.back()}>
           Cancel
         </Button>
       </div>
