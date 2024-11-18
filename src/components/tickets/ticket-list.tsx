@@ -39,7 +39,7 @@ export function TicketList({ orders }: TicketListProps) {
           to find something interesting!
         </p>
         <Button asChild>
-          <Link href='/events'>Browse Events</Link>
+          <Link href='/explore'>Browse Events</Link>
         </Button>
       </Card>
     )

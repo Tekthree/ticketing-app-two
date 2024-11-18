@@ -1,7 +1,7 @@
 // @@filename: src/components/events/events-list.tsx
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useEvents } from '@/hooks/use-events'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -21,12 +21,31 @@ import { cn } from '@/lib/utils'
 import { formatDate } from '@/lib/utils'
 
 export function EventsList() {
-  const { events, loading, error, deleteEvent } = useEvents()
+  const { events, loading, error } = useEvents()
   const { user } = useAuth()
   const [deleting, setDeleting] = useState<string | null>(null)
   const router = useRouter()
 
+  // Add debug logs
+  console.log('EventsList Render:', {
+    user: user?.id,
+    loading,
+    eventsCount: events?.length,
+    events,
+    error
+  })
+
+  useEffect(() => {
+    console.log('Events Data Changed:', {
+      timestamp: new Date().toISOString(),
+      events,
+      loading,
+      error
+    })
+  }, [events, loading, error])
+
   const handleDelete = async (eventId: string) => {
+    console.log('Attempting delete:', eventId)
     if (!window.confirm('Are you sure you want to delete this event?')) {
       return
     }
@@ -44,6 +63,7 @@ export function EventsList() {
   }
 
   if (loading) {
+    console.log('Loading state active')
     return (
       <div className='flex items-center justify-center py-12'>
         <div className='text-center'>
@@ -57,6 +77,7 @@ export function EventsList() {
   }
 
   if (error) {
+    console.error('Error in EventsList:', error)
     return (
       <div className='rounded-lg border border-destructive/50 bg-destructive/10 p-4'>
         <p className='text-sm text-destructive'>
@@ -65,6 +86,8 @@ export function EventsList() {
       </div>
     )
   }
+
+  console.log('Rendering events:', events?.length || 0)
 
   if (!events?.length) {
     return (

@@ -35,6 +35,13 @@ export default async function MyEventsPage() {
     redirect('/dashboard')
   }
 
+  // Fetch user's events
+  const { data: events } = await supabase
+    .from('events')
+    .select('*')
+    .eq('organizer_id', user.id)
+    .order('created_at', { ascending: false })
+
   return (
     <DashboardShell>
       <DashboardHeader
@@ -42,16 +49,13 @@ export default async function MyEventsPage() {
         text='Create and manage your events.'
       >
         <Button asChild>
-          <Link href='/dashboard/events/new'>
+          <Link href='/events/new'>
             <Plus className='mr-2 h-4 w-4' />
             Create Event
           </Link>
         </Button>
       </DashboardHeader>
-
-      <div className='grid gap-8'>
-        <EventsList />
-      </div>
+      <EventsList events={events || []} />
     </DashboardShell>
   )
 }

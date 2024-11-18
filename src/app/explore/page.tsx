@@ -9,10 +9,13 @@ export const revalidate = 0
 
 async function getPublicEvents() {
   const supabase = await createServerSupabaseClient()
-  
+
+  console.log('Fetching events at:', new Date().toISOString())
+
   const { data: events, error } = await supabase
     .from('events')
-    .select(`
+    .select(
+      `
       *,
       ticket_types (
         id,
@@ -26,10 +29,16 @@ async function getPublicEvents() {
         url,
         alt
       )
-    `)
+    `
+    )
     .eq('status', 'published')
-    .gt('date', new Date().toISOString())
     .order('date', { ascending: true })
+
+  console.log('Query results:', {
+    count: events?.length,
+    error,
+    events,
+  })
 
   if (error) {
     console.error('Error fetching events:', error)
@@ -41,73 +50,52 @@ async function getPublicEvents() {
 
 export default async function ExplorePage() {
   const events = await getPublicEvents()
+  console.log('Rendering events:', events?.length)
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
       {/* Header */}
-      <div className="py-8">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Discover Events
-        </h1>
-        <p className="mt-2 text-muted-foreground">
+      <div className='py-8'>
+        <h1 className='text-3xl font-bold tracking-tight'>Discover Events</h1>
+        <p className='mt-2 text-muted-foreground'>
           Find amazing events happening near you
         </p>
       </div>
 
       {/* Filter Buttons */}
-      <div className="mb-8 flex flex-wrap gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          <Calendar className="h-4 w-4" />
+      <div className='mb-8 flex flex-wrap gap-2'>
+        <Button variant='outline' size='sm' className='gap-2'>
+          <Calendar className='h-4 w-4' />
           Date
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          <Music className="h-4 w-4" />
+        <Button variant='outline' size='sm' className='gap-2'>
+          <Music className='h-4 w-4' />
           Shows
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          <Users className="h-4 w-4" />
+        <Button variant='outline' size='sm' className='gap-2'>
+          <Users className='h-4 w-4' />
           Workshop
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          <PartyPopper className="h-4 w-4" />
+        <Button variant='outline' size='sm' className='gap-2'>
+          <PartyPopper className='h-4 w-4' />
           Party
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          <Ticket className="h-4 w-4" />
+        <Button variant='outline' size='sm' className='gap-2'>
+          <Ticket className='h-4 w-4' />
           Other
         </Button>
       </div>
 
       {/* Events Grid */}
       {events.length === 0 ? (
-        <div className="flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-          <h2 className="mt-4 text-lg font-semibold">No events found</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
+        <div className='flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center'>
+          <h2 className='mt-4 text-lg font-semibold'>No events found</h2>
+          <p className='mt-2 text-sm text-muted-foreground'>
             Check back later for upcoming events.
           </p>
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
           {events.map(event => (
             <EventCard
               key={event.id}

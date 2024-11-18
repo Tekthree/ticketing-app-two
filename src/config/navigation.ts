@@ -33,7 +33,7 @@ export const dashboardNav = [
   },
   {
     title: 'My Events',
-    href: '/dashboard/events',
+    href: '/events',
     icon: Calendar,
   },
   {

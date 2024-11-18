@@ -67,7 +67,7 @@ export default async function TicketsPage() {
         text='View and manage your event tickets.'
       >
         <Button asChild>
-          <Link href='/events'>
+          <Link href='/explore'>
             <Plus className='mr-2 h-4 w-4' />
             Find Events
           </Link>
