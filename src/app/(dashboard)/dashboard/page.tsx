@@ -100,7 +100,7 @@ export default async function DashboardPage() {
         text='Overview of your events and ticket sales'
       >
         <Button asChild>
-          <Link href='/events/new'>
+          <Link href='/dashboard/events/new'>
             <Plus className='mr-2 h-4 w-4' />
             Create Event
           </Link>
@@ -186,10 +186,10 @@ export default async function DashboardPage() {
                       </Link>
                     </Button>
                     <Button asChild variant='ghost' size='sm'>
-                      <Link href={`/events/${event.id}/edit`}>Edit Event</Link>
+                      <Link href={`/dashboard/events/${event.id}/edit`}>Edit Event</Link>
                     </Button>
                     <Button asChild size='sm'>
-                      <Link href={`/events/${event.id}`} target='_blank'>
+                      <Link href={`/explore/${event.id}`} target='_blank'>
                         Preview
                       </Link>
                     </Button>

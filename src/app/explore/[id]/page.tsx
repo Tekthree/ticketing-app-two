@@ -1,4 +1,4 @@
-// @@filename: src/app/events/[id]/page.tsx
+// @@filename: src/app/explore/[id]/page.tsx
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import EventHero from '@/components/events/event-hero'
@@ -18,11 +18,13 @@ export default async function EventPage({ params }: PageProps) {
   // Fetch event with related data
   const { data: event, error } = await supabase
     .from('events')
-    .select(`
+    .select(
+      `
       *,
       ticket_types (*),
       event_images (*)
-    `)
+    `
+    )
     .eq('id', id)
     .single()
 
@@ -42,28 +44,25 @@ export default async function EventPage({ params }: PageProps) {
 
   return (
     <>
-      <div className="relative min-h-screen">
+      <div className='relative min-h-screen'>
         <EventHero
           title={event.title}
           date={eventDate}
           venue={event.venue}
           image={event.event_images?.[0]?.url}
         />
-        
-        <EventContent 
+
+        <EventContent
           event={event}
           organizer={organizer}
           ticketTypes={event.ticket_types}
         />
 
-        <div className="relative z-10 mt-8 bg-background">
-          <RelatedEvents 
-            currentEventId={event.id}
-            venueId={event.venue}
-          />
+        <div className='relative z-10 mt-8 bg-background'>
+          <RelatedEvents currentEventId={event.id} venueId={event.venue} />
         </div>
       </div>
-      
+
       <AppFooter />
     </>
   )

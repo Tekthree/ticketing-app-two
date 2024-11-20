@@ -9,8 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { redirect } from 'next/navigation'
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+
 
 async function getOrders() {
   const supabase = await createServerSupabaseClient()

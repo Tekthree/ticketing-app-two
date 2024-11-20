@@ -52,7 +52,7 @@ export function FeaturedEventCard({
       </CardContent>
       <CardFooter>
         <Button asChild className='w-full'>
-          <Link href={`/events/${id}`}>View Event</Link>
+          <Link href={`/explore/${id}`}>View Event</Link>
         </Button>
       </CardFooter>
     </Card>

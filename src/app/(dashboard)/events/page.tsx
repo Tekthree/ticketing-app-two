@@ -8,8 +8,7 @@ import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { EventsList } from '@/components/events/events-list'
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+
 
 export default async function MyEventsPage() {
   const supabase = await createServerSupabaseClient()
@@ -49,7 +48,7 @@ export default async function MyEventsPage() {
         text='Create and manage your events.'
       >
         <Button asChild>
-          <Link href='/events/new'>
+          <Link href='/dashboard/events/new'>
             <Plus className='mr-2 h-4 w-4' />
             Create Event
           </Link>

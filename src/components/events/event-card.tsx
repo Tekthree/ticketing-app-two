@@ -94,7 +94,7 @@ export function EventCard({
                   <span className='sr-only'>Add to wishlist</span>
                 </Button>
                 <Button asChild className='h-8'>
-                  <Link href={`/events/${id}`}>Get Tickets</Link>
+                  <Link href={`/explore/${id}`}>Get Tickets</Link>
                 </Button>
               </>
             )}

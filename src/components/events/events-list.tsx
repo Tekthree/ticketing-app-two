@@ -100,7 +100,7 @@ export function EventsList() {
         </p>
         <div className='mt-6'>
           <Button asChild>
-            <Link href='/events/new'>Create new event</Link>
+            <Link href='/dashboard/events/new'>Create new event</Link>
           </Button>
         </div>
       </Card>
@@ -159,7 +159,7 @@ export function EventsList() {
             <div className='flex justify-between items-center gap-2'>
               <Button asChild variant='ghost' size='sm' className='w-full'>
                 <Link
-                  href={`/events/${event.id}`}
+                  href={`/explore/${event.id}`}
                   className='flex items-center justify-center'
                 >
                   <Eye className='mr-2 h-4 w-4' />

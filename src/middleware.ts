@@ -18,7 +18,6 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options) {
-          // Set cookie with all available options from docs
           response.cookies.set({
             name,
             value,
@@ -41,41 +40,37 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session if needed
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
 
-  // Protected routes handling
-  const isAuthRoute = request.nextUrl.pathname.startsWith('/auth')
-  const isProtectedRoute = ['/dashboard', '/tickets', '/analytics', '/events/new']
-    .some(path => request.nextUrl.pathname.startsWith(path))
+    // Public routes: /explore, /explore/[id]
+    // Protected routes: /dashboard/*
+    const isDashboardRoute = request.nextUrl.pathname.startsWith('/dashboard')
+    const isAuthRoute = ['/login', '/register'].some(path =>
+      request.nextUrl.pathname.startsWith(path)
+    )
 
-  if (isProtectedRoute && !session) {
-    // Store the attempted URL
-    const redirectUrl = new URL('/login', request.url)
-    redirectUrl.searchParams.set('redirectTo', request.nextUrl.pathname)
-    return NextResponse.redirect(redirectUrl)
+    if (isDashboardRoute && !session) {
+      const redirectUrl = new URL('/login', request.url)
+      redirectUrl.searchParams.set('redirectTo', request.nextUrl.pathname)
+      return NextResponse.redirect(redirectUrl)
+    }
+
+    if (isAuthRoute && session) {
+      const redirectTo =
+        request.nextUrl.searchParams.get('redirectTo') || '/dashboard'
+      return NextResponse.redirect(new URL(redirectTo, request.url))
+    }
+
+    return response
+  } catch (error) {
+    console.error('Middleware error:', error)
+    return response
   }
-
-  if (isAuthRoute && session) {
-    // Get the intended destination or default to dashboard
-    const redirectTo = request.nextUrl.searchParams.get('redirectTo') || '/dashboard'
-    return NextResponse.redirect(new URL(redirectTo, request.url))
-  }
-
-  return response
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public directory
-     */
-    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|public/).*)'],
 }

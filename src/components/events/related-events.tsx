@@ -77,7 +77,7 @@ export default function RelatedEvents({ currentEventId, venueId }: RelatedEvents
                 <div className="absolute inset-0 -z-10 bg-gradient-to-b from-gray-900/30 via-gray-900/20" />
 
                 <h3 className="mt-3 text-2xl font-semibold leading-6 text-white">
-                  <Link href={`/events/${event.id}`}>
+                  <Link href={`/explore/${event.id}`}>
                     <span className="absolute inset-0" />
                     {event.title}
                   </Link>
