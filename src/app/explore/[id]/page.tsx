@@ -9,6 +9,7 @@ import { LineupSection } from '@/components/events/lineup-section'
 import { RelatedEvents } from '@/components/events/related-events'
 import { type Database } from '@/lib/supabase/types'
 import { addHours, parseISO } from 'date-fns'
+import Image from 'next/image'
 
 interface PageProps {
   params: Promise<{ id: string }> | { id: string }
@@ -63,51 +64,76 @@ export default async function EventPage({ params }: PageProps) {
 
   return (
     <div className="relative min-h-screen bg-black text-white">
-      {/* Background Image & Overlay */}
+      {/* Top background image section with longer fade */}
       {event.event_images?.[0]?.url && (
-        <>
-          <div
-            className="absolute inset-0 bg-cover bg-center blur-xl opacity-40"
-            style={{ backgroundImage: `url(${event.event_images[0].url})` }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/80 to-black" />
-        </>
+        <div 
+          className="absolute top-0 left-0 right-0 h-[1200px]"
+          style={{
+            backgroundImage: `url(${event.event_images[0].url})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            filter: 'blur(40px) brightness(0.4)',
+            maskImage: 'linear-gradient(to bottom, black 10%, rgba(0,0,0,0.5) 50%, transparent 90%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 10%, rgba(0,0,0,0.5) 50%, transparent 90%)',
+          }}
+        />
       )}
 
       {/* Content */}
       <div className="relative z-10">
-        <EventHero
-          title={event.title}
-          date={new Date(event.date)}
-          venue={event.venue}
-          image={event.event_images?.[0]?.url}
-        />
-
-        <main className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column */}
-            <div className="space-y-8">
-              <EventContent
-                event={event}
-                ticketTypes={event.ticket_types}
-                organizer={organizer}
-              />
-              <VenueSection
-                venue={event.venue}
-                address={event.venue}
-              />
-            </div>
-
-            {/* Right Column */}
-            <div className="space-y-8">
-              <TicketSection
-                ticketTypes={event.ticket_types}
-                eventId={event.id}
-              />
-              <LineupSection artists={lineup} />
+        <div className="container mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 px-4 py-8">
+          {/* Left Column - Sticky Image */}
+          <div className="lg:col-span-5">
+            <div className="lg:sticky lg:top-8">
+              <div className="aspect-[4/3] rounded-xl overflow-hidden bg-zinc-900/50">
+                {event.event_images?.[0]?.url && (
+                  <Image
+                    src={event.event_images[0].url}
+                    alt={event.title}
+                    className="w-full h-full object-cover"
+                    width={600}
+                    height={450}
+                    priority
+                  />
+                )}
+              </div>
             </div>
           </div>
-        </main>
+
+          {/* Right Column - Event Details */}
+          <div className="lg:col-span-7 space-y-8">
+            {/* Hero/Title Section - without image */}
+            <EventHero
+              title={event.title}
+              date={new Date(event.date)}
+              venue={event.venue}
+              image={undefined} // Remove image from hero
+            />
+
+            {/* Ticket Section */}
+            <TicketSection
+              ticketTypes={event.ticket_types}
+              eventId={event.id}
+            />
+
+            {/* Event Content */}
+            <EventContent
+              event={event}
+              ticketTypes={event.ticket_types}
+              organizer={organizer}
+            />
+
+            {/* Venue Section */}
+            <VenueSection
+              venue={event.venue}
+              address={event.venue}
+            />
+
+            {/* Lineup Section */}
+            <LineupSection artists={lineup} />
+          </div>
+        </div>
 
         {/* Related Events */}
         <section className="bg-zinc-900/50 py-16 mt-16">
