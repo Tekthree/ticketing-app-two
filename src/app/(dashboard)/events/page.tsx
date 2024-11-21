@@ -48,7 +48,7 @@ export default async function MyEventsPage() {
         text='Create and manage your events.'
       >
         <Button asChild>
-          <Link href='/dashboard/events/new'>
+          <Link href='/events/new'>
             <Plus className='mr-2 h-4 w-4' />
             Create Event
           </Link>

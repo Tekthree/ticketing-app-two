@@ -100,7 +100,7 @@ export function EventsList() {
         </p>
         <div className='mt-6'>
           <Button asChild>
-            <Link href='/dashboard/events/new'>Create new event</Link>
+            <Link href='/events/new'>Create new event</Link>
           </Button>
         </div>
       </Card>

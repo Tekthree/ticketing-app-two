@@ -100,7 +100,7 @@ export default async function DashboardPage() {
         text='Overview of your events and ticket sales'
       >
         <Button asChild>
-          <Link href='/dashboard/events/new'>
+          <Link href='/events/new'>
             <Plus className='mr-2 h-4 w-4' />
             Create Event
           </Link>
@@ -152,7 +152,7 @@ export default async function DashboardPage() {
               Get started by creating your first event.
             </p>
             <Button asChild className='mt-6'>
-              <Link href='/dashboard/events/new'>Create Event</Link>
+              <Link href='/events/new'>Create Event</Link>
             </Button>
           </Card>
         ) : (
@@ -181,12 +181,12 @@ export default async function DashboardPage() {
                   </div>
                   <div className='flex gap-2'>
                     <Button asChild variant='ghost' size='sm'>
-                      <Link href={`/dashboard/events/${event.id}`}>
+                      <Link href={`/events/${event.id}`}>
                         View Analytics
                       </Link>
                     </Button>
                     <Button asChild variant='ghost' size='sm'>
-                      <Link href={`/dashboard/events/${event.id}/edit`}>Edit Event</Link>
+                      <Link href={`/events/${event.id}/edit`}>Edit Event</Link>
                     </Button>
                     <Button asChild size='sm'>
                       <Link href={`/explore/${event.id}`} target='_blank'>
